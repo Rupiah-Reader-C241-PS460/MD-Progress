@@ -4,7 +4,6 @@ import android.os.Build
 import android.os.Bundle
 import android.view.WindowInsets
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.dicoding.picodiploma.mycamera.databinding.ActivityCameraBinding
 
@@ -19,7 +18,7 @@ class CameraActivity : AppCompatActivity() {
         binding.switchCamera.setOnClickListener {
             startCamera()
         }
-        binding.captureImage.setOnClickListener { uploadImage() }
+        binding.captureImage.setOnClickListener { takePhoto() }
     }
 
     public override fun onResume() {
@@ -34,10 +33,6 @@ class CameraActivity : AppCompatActivity() {
 
     private fun takePhoto() {
         // takePhoto
-    }
-
-    private fun uploadImage() {
-        Toast.makeText(this, "Fitur ini belum tersedia", Toast.LENGTH_SHORT).show()
     }
 
     private fun hideSystemUI() {
