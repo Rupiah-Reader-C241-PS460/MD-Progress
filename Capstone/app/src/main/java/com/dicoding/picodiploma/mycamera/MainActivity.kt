@@ -1,5 +1,7 @@
 package com.dicoding.picodiploma.mycamera
 
+import android.content.Context
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
@@ -18,6 +20,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var gestureDetector: GestureDetector
     private lateinit var textToSpeech: TextToSpeech
+    private lateinit var audioManager: AudioManager
 
     private var currentImageUri: Uri? = null
 
@@ -27,6 +30,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         setContentView(binding.root)
 
         textToSpeech = TextToSpeech(this, this)
+
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
@@ -57,6 +62,9 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
     private fun speakOut(text: String) {
+        val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0)
+
         textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
     }
 
