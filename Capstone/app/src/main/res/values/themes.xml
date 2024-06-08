@@ -1,10 +1,7 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Base.Theme.MyCamera" parent="Theme.Material3.DayNight.NoActionBar">
-
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@drawable/revisi_logo</item>
     </style>
-
-    <style name="Theme.MyCamera" parent="Base.Theme.MyCamera" />
 </resources>

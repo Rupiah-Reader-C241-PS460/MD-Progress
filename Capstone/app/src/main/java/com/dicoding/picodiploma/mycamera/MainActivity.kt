@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private fun startCamera() {
         currentImageUri = getImageUri(this)
-        launcherIntentCamera.launch(currentImageUri)
+        launcherIntentCamera.launch(currentImageUri!!)
     }
 
     private val launcherIntentCamera = registerForActivityResult(
