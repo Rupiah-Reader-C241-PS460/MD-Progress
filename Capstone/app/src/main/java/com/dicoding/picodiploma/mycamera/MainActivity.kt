@@ -8,11 +8,18 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
+import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.dicoding.picodiploma.mycamera.ViewModel.MyViewModel
 import com.dicoding.picodiploma.mycamera.databinding.ActivityMainBinding
+import java.io.File
+import java.io.InputStream
 import java.util.Locale
 
 class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
@@ -21,7 +28,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var gestureDetector: GestureDetector
     private lateinit var textToSpeech: TextToSpeech
     private lateinit var audioManager: AudioManager
-
+    private lateinit var viewModel: MyViewModel
+    private lateinit var resultTextView: TextView
     private var currentImageUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,16 +37,38 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
+        resultTextView = binding.resultTextView
         textToSpeech = TextToSpeech(this, this)
-
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
         gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
                 startCamera()
                 return true
             }
         })
+        val buttonPredict = binding.buttonPredict
+        buttonPredict.setOnClickListener {
+            currentImageUri?.let {
+                val file = uriToFile(it)
+                viewModel.predictImage(file)
+            } ?: run {
+                Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show()
+            }
+            viewModel.predictResult.observe(this, Observer { response ->
+                response?.let {
+                    resultTextView.text = "Result: ${it.data.result}\nSuggestion: ${it.data.suggestion}"
+                } ?: run {
+                    resultTextView.text = "No result from API"
+                }
+            })
+            viewModel.error.observe(this, Observer { errorMessage ->
+                errorMessage?.let {
+                    Log.e("API_ERROR", it)
+                    resultTextView.text = "Error: $it"
+                }
+            })
+        }
     }
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
@@ -64,7 +94,6 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private fun speakOut(text: String) {
         val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0)
-
         textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
     }
 
@@ -91,9 +120,12 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             binding.previewImageView.setImageURI(it)
         }
     }
-
-    private fun uploadImage() {
-        Toast.makeText(this, "Fitur ini belum tersedia", Toast.LENGTH_SHORT).show()
+    private fun uriToFile(uri: Uri): File {
+        val inputStream: InputStream? = contentResolver.openInputStream(uri)
+        val tempFile = File.createTempFile("image", ".jpg", cacheDir)
+        tempFile.outputStream().use { outputStream ->
+            inputStream?.copyTo(outputStream)
+        }
+        return tempFile
     }
-
 }
