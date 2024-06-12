@@ -57,7 +57,9 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
             viewModel.predictResult.observe(this, Observer { response ->
                 response?.let {
-                    resultTextView.text = "Result: ${it.data.result}\nSuggestion: ${it.data.suggestion}"
+                    val resultText= "Hasil Uang adalah : ${it.data.result}"
+                    binding.resultTextView.text = resultText
+                    speakOut(resultText)
                 } ?: run {
                     resultTextView.text = "No result from API"
                 }
