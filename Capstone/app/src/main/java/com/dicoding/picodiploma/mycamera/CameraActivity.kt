@@ -31,12 +31,7 @@ class CameraActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
         textToSpeech = TextToSpeech(this, this)
 
-        binding.switchCamera.setOnClickListener {
-            cameraSelector = if (cameraSelector.equals(CameraSelector.DEFAULT_BACK_CAMERA)) CameraSelector.DEFAULT_FRONT_CAMERA
-            else CameraSelector.DEFAULT_BACK_CAMERA
-            startCamera()
-        }
-        binding.captureImage.setOnClickListener { takePhoto() }
+        binding.viewFinder.setOnClickListener { takePhoto() }
     }
 
     override fun onInit(status: Int) {
