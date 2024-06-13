@@ -73,32 +73,35 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 startCameraX()
                 return true
             }
-        })
-        val buttonPredict = binding.buttonPredict
-        buttonPredict.setOnClickListener {
-            currentImageUri?.let {
-                val file = uriToFile(it)
-                viewModel.predictImage(file)
-            } ?: run {
-                Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show()
-            }
-            viewModel.predictResult.observe(this, Observer { response ->
-                response?.let {
-                    val resultText= "Hasil Uang adalah : ${it.data.result} Rupiah"
-                    binding.resultTextView.text = resultText
-                    speakOut(resultText)
+
+            override fun onLongPress(e: MotionEvent) {
+                super.onLongPress(e)
+                currentImageUri?.let {
+                    val file = uriToFile(it)
+                    viewModel.predictImage(file)
                 } ?: run {
-                    resultTextView.text = "No result from API"
+                    Toast.makeText(this@MainActivity, "No image selected", Toast.LENGTH_SHORT).show()
                 }
-            })
-            viewModel.error.observe(this, Observer { errorMessage ->
-                errorMessage?.let {
-                    Log.e("API_ERROR", it)
-                    resultTextView.text = "Error: $it"
-                }
-            })
-        }
+            }
+        })
+
+        viewModel.predictResult.observe(this, Observer { response ->
+            response?.let {
+                val resultText = "Hasil Uang adalah : ${it.data.result} Rupiah"
+                binding.resultTextView.text = resultText
+                speakOut(resultText)
+            } ?: run {
+                resultTextView.text = "No result from API"
+            }
+        })
+        viewModel.error.observe(this, Observer { errorMessage ->
+            errorMessage?.let {
+                Log.e("API_ERROR", it)
+                resultTextView.text = "Error: $it"
+            }
+        })
     }
+
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             val result = textToSpeech.setLanguage(Locale("id", "ID"))
@@ -148,8 +151,11 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         currentImageUri?.let {
             Log.d("Image URI", "showImage: $it")
             binding.previewImageView.setImageURI(it)
+            // Tambahkan audio setelah gambar ditampilkan
+            speakOut("Tahan layar selama 2 detik untuk memprediksi gambar")
         }
     }
+
     private fun uriToFile(uri: Uri): File {
         val inputStream: InputStream? = contentResolver.openInputStream(uri)
         val tempFile = File.createTempFile("image", ".jpg", cacheDir)
@@ -158,6 +164,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
         return tempFile
     }
+
     companion object {
         private const val REQUIRED_PERMISSION = Manifest.permission.CAMERA
     }
