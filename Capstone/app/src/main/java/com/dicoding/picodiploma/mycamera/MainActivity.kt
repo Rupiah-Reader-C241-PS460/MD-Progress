@@ -21,6 +21,12 @@ import com.dicoding.picodiploma.mycamera.databinding.ActivityMainBinding
 import java.io.File
 import java.io.InputStream
 import java.util.Locale
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import com.dicoding.picodiploma.mycamera.CameraActivity.Companion.CAMERAX_RESULT
 
 class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
@@ -32,10 +38,31 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var resultTextView: TextView
     private var currentImageUri: Uri? = null
 
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                Toast.makeText(this, "Permission request granted", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "Permission request denied", Toast.LENGTH_LONG).show()
+            }
+        }
+
+    private fun allPermissionsGranted() =
+        ContextCompat.checkSelfPermission(
+            this,
+            REQUIRED_PERMISSION
+        ) == PackageManager.PERMISSION_GRANTED
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        if (!allPermissionsGranted()) {
+            requestPermissionLauncher.launch(REQUIRED_PERMISSION)
+        }
 
         viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
         resultTextView = binding.resultTextView
@@ -43,7 +70,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
-                startCamera()
+                startCameraX()
                 return true
             }
         })
@@ -57,7 +84,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
             viewModel.predictResult.observe(this, Observer { response ->
                 response?.let {
-                    val resultText= "Hasil Uang adalah : ${it.data.result}"
+                    val resultText= "Hasil Uang adalah : ${it.data.result} Rupiah"
                     binding.resultTextView.text = resultText
                     speakOut(resultText)
                 } ?: run {
@@ -103,15 +130,16 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         return gestureDetector.onTouchEvent(event!!) || super.onTouchEvent(event)
     }
 
-    private fun startCamera() {
-        currentImageUri = getImageUri(this)
-        launcherIntentCamera.launch(currentImageUri!!)
+    private fun startCameraX() {
+        val intent = Intent(this, CameraActivity::class.java)
+        launcherIntentCameraX.launch(intent)
     }
 
-    private val launcherIntentCamera = registerForActivityResult(
-        ActivityResultContracts.TakePicture()
-    ) { isSuccess ->
-        if (isSuccess) {
+    private val launcherIntentCameraX = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == CAMERAX_RESULT) {
+            currentImageUri = it.data?.getStringExtra(CameraActivity.EXTRA_CAMERAX_IMAGE)?.toUri()
             showImage()
         }
     }
@@ -129,5 +157,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             inputStream?.copyTo(outputStream)
         }
         return tempFile
+    }
+    companion object {
+        private const val REQUIRED_PERMISSION = Manifest.permission.CAMERA
     }
 }
