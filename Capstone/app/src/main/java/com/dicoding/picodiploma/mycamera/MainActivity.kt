@@ -152,7 +152,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             Log.d("Image URI", "showImage: $it")
             binding.previewImageView.setImageURI(it)
             // Tambahkan audio setelah gambar ditampilkan
-            speakOut("Tahan layar selama 2 detik untuk memprediksi gambar")
+            speakOut("Tahan layar selama 2 detik untuk mengetahui nominal uang")
         }
     }
 
