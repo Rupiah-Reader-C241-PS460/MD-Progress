@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var gestureDetector: GestureDetector
     private lateinit var textToSpeech: TextToSpeech
     private lateinit var audioManager: AudioManager
-    private lateinit var viewModel: MyViewModel
+    lateinit var viewModel: MyViewModel
     private lateinit var resultTextView: TextView
     private var currentImageUri: Uri? = null
 
@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         super.onDestroy()
     }
 
-    private fun speakOut(text: String) {
+    fun speakOut(text: String) {
         val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0)
         textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
@@ -156,7 +156,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun uriToFile(uri: Uri): File {
+    fun uriToFile(uri: Uri): File {
         val inputStream: InputStream? = contentResolver.openInputStream(uri)
         val tempFile = File.createTempFile("image", ".jpg", cacheDir)
         tempFile.outputStream().use { outputStream ->
