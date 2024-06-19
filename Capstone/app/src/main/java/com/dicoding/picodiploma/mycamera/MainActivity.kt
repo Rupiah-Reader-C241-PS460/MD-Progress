@@ -110,6 +110,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         viewModel.isLoading.observe(this, Observer { isLoading ->
             if (isLoading) {
                 progressBar.visibility = View.VISIBLE // Show ProgressBar
+                speakOut("Diproses")
             } else {
                 progressBar.visibility = View.GONE // Hide ProgressBar
             }

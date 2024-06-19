@@ -40,7 +40,7 @@ class CameraActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                 Toast.makeText(this, "Bahasa tidak didukung", Toast.LENGTH_SHORT).show()
             } else {
-                speakOut("Tekan layar untuk mengambil gambar")
+                speakOut("Foto 1 lembar uang dengan cara menekan layar")
             }
         } else {
             Toast.makeText(this, "Inisialisasi TextToSpeech gagal", Toast.LENGTH_SHORT).show()
