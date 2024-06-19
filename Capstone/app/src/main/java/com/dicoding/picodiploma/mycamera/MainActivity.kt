@@ -24,6 +24,8 @@ import java.util.Locale
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.view.View
+import android.widget.ProgressBar
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.dicoding.picodiploma.mycamera.CameraActivity.Companion.CAMERAX_RESULT
@@ -34,9 +36,10 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var gestureDetector: GestureDetector
     private lateinit var textToSpeech: TextToSpeech
     private lateinit var audioManager: AudioManager
-    private lateinit var viewModel: MyViewModel
+    lateinit var viewModel: MyViewModel
     private lateinit var resultTextView: TextView
     private var currentImageUri: Uri? = null
+    private lateinit var progressBar: ProgressBar
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -64,6 +67,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             requestPermissionLauncher.launch(REQUIRED_PERMISSION)
         }
 
+
+        progressBar = findViewById(R.id.progressBar)
         viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
         resultTextView = binding.resultTextView
         textToSpeech = TextToSpeech(this, this)
@@ -86,6 +91,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         })
 
         viewModel.predictResult.observe(this, Observer { response ->
+            progressBar.visibility = android.view.View.GONE
             response?.let {
                 val resultText = "Hasil Uang adalah : ${it.data.result} Rupiah"
                 binding.resultTextView.text = resultText
@@ -95,9 +101,17 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
         })
         viewModel.error.observe(this, Observer { errorMessage ->
+            progressBar.visibility = android.view.View.GONE
             errorMessage?.let {
                 Log.e("API_ERROR", it)
                 resultTextView.text = "Error: $it"
+            }
+        })
+        viewModel.isLoading.observe(this, Observer { isLoading ->
+            if (isLoading) {
+                progressBar.visibility = View.VISIBLE // Show ProgressBar
+            } else {
+                progressBar.visibility = View.GONE // Hide ProgressBar
             }
         })
     }
@@ -123,7 +137,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         super.onDestroy()
     }
 
-    private fun speakOut(text: String) {
+    fun speakOut(text: String) {
         val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0)
         textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
@@ -156,7 +170,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun uriToFile(uri: Uri): File {
+    fun uriToFile(uri: Uri): File {
         val inputStream: InputStream? = contentResolver.openInputStream(uri)
         val tempFile = File.createTempFile("image", ".jpg", cacheDir)
         tempFile.outputStream().use { outputStream ->
