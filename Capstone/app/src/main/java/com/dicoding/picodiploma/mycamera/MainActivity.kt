@@ -24,6 +24,7 @@ import java.util.Locale
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.speech.tts.UtteranceProgressListener
 import android.view.View
 import android.widget.ProgressBar
 import androidx.core.content.ContextCompat
@@ -125,6 +126,23 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             } else {
                 speakOut("Ketuk layar dua kali untuk membuka kamera")
             }
+
+            textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                override fun onStart(utteranceId: String?) {
+                    // Do nothing
+                }
+
+                override fun onDone(utteranceId: String?) {
+                    // Teks selesai dibacakan, hilangkan teks dari TextView
+                    runOnUiThread {
+                        binding.resultTextView.text = ""
+                    }
+                }
+
+                override fun onError(utteranceId: String?) {
+                    // Handle error here
+                }
+            })
         } else {
             Toast.makeText(this, "Inisialisasi TextToSpeech gagal", Toast.LENGTH_SHORT).show()
         }
@@ -141,7 +159,11 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     fun speakOut(text: String) {
         val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0)
-        textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
+
+        val params = HashMap<String, String>()
+        params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "utteranceId"
+
+        textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, params)
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
