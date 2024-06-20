@@ -68,7 +68,6 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             requestPermissionLauncher.launch(REQUIRED_PERMISSION)
         }
 
-
         progressBar = findViewById(R.id.progressBar)
         viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
         resultTextView = binding.resultTextView
@@ -96,7 +95,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             response?.let {
                 val resultText = "Hasil Uang adalah : ${it.data.result} Rupiah"
                 binding.resultTextView.text = resultText
-                speakOut(resultText)
+                speakOut(resultText + "...........Ketuk layar dua kali jika ingin mengambil gambar lagi")
             } ?: run {
                 resultTextView.text = "No result from API"
             }
