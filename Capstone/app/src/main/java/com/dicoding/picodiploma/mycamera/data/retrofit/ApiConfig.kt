@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiConfig {
-    private const val BASE_URL = "https://backend-uang-qlobjw7f2a-et.a.run.app/"
+    private const val BASE_URL = "https://rupiahuangapi-qlobjw7f2a-et.a.run.app/"
 
     private val client by lazy {
         OkHttpClient.Builder()
